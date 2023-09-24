@@ -10,12 +10,6 @@ import {BACKEND} from '@env';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchResults, fetchEmotion } from '../store/actions/results/resultAction';
 
-/*
-const propTypes = {
-    ...compat(View.propTypes),
-    // 나머지 propTypes 정의
-};
-*/
 const Stack = createNativeStackNavigator();
 
 const PersonList = () => {
@@ -59,10 +53,6 @@ const PersonList = () => {
             const fetchedData = await fetchResultsFromBackend();
             console.log(fetchedData);
             dispatch(fetchResults(fetchedData));
-
-            // const fetchCSV = await fetchCSVFile();
-            // console.log('cetchCSV : ', fetchCSV);
-            // dispatch(fetchEmotion(fetchCSV));
         }
 
         fetchData();
@@ -78,9 +68,8 @@ const PersonList = () => {
         try {
             const access = await AsyncStorage.getItem("access");
             console.log(access);
-            const response = await axios.get(BACKEND+`:8000/result/`, /*BACKEND+':8000/result/' BACKEND+`:8000/result/`*/
+            const response = await axios.get(BACKEND+':8000/result/', /*BACKEND+':8000/result/' BACKEND+`:8000/result/`*/
             {
-                //params: {id: person.id},
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${access}`
@@ -112,7 +101,7 @@ const PersonList = () => {
         try {
             console.log(email);
             const access = await AsyncStorage.getItem("access");
-            const response = await axios.post(BACKEND+`:8000/counselee/`, /*BACKEND+':8000/counselee/' BACKEND+`:8000/counselee/`*/
+            const response = await axios.post(BACKEND+':8000/counselee/', /*BACKEND+':8000/counselee/' BACKEND+`:8000/counselee/`*/
             { email: email },
             {
                 headers: {
@@ -121,8 +110,8 @@ const PersonList = () => {
                 }
             }
             );
-            console.log(response.status);
-            console.log(response.data);
+            console.log('1 ', response.status);
+            console.log('2 ', response.data);
     
             return response.data;
         } catch (error) {
@@ -155,9 +144,9 @@ const PersonList = () => {
     
     const renderItem = ({ item }) => (
         <View style={styles.item}>
-            <Text>Name: {item.userkey.name}</Text>
-            <Text>Gender: {item.userkey.gender}</Text>
-            <Text>Birth: {item.userkey.birth}</Text>
+            <Text>Name: {item.name}</Text>
+            <Text>Gender: {item.gender}</Text>
+            <Text>Birth: {item.birth}</Text>
         </View>
     );    
     const openModal = () => {
@@ -219,6 +208,7 @@ const PersonList = () => {
     const swipeableRefs = {};
 
     const renderPersonItem = ({ item, index }) => {
+        console.log('personItem : ', item);
         const rightButtons = [
             <TouchableOpacity
                 style={styles.deleteButton}
@@ -246,10 +236,10 @@ const PersonList = () => {
                 <TouchableOpacity onPress={showPersonDetails}>
                     <View style={styles.personItem}>
                         {/* 리스트 아이템 내용 */}
-                        <Text>Name: {item.userkey.name}</Text>
-                        <Text>Email: {item.userkey.email}</Text>
-                        <Text>Gender: {item.userkey.gender}</Text>
-                        <Text>Birth: {item.userkey.birth}</Text>
+                        <Text>Name: {item.name}</Text>
+                        <Text>Email: {item.email}</Text>
+                        <Text>Gender: {item.gender}</Text>
+                        <Text>Birth: {item.birth}</Text>
                     </View>
                 </TouchableOpacity>
             </Swipeable>

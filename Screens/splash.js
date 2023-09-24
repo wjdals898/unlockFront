@@ -6,6 +6,7 @@ import axios from 'axios';
 import {BACKEND} from '@env';
 import { fetchCounselees } from "../store/actions/counselees/counseleeAction";
 import { useDispatch } from 'react-redux';
+import { getUserInfo, getUserToken } from "../store/actions/user/userAction";
 
 const Splash = () => {
   const dispatch = useDispatch();
@@ -19,12 +20,13 @@ const Splash = () => {
     });
 
     try {
-      const response = await axios.get(BACKEND+`:8000/account/info/`, { //BACKEND+`:8000/account/info/` BACKEND+':8000/account/info/'
+      const response = await axios.get(`${BACKEND}:8000/account/info/`, { //BACKEND+`:8000/account/info/` BACKEND+':8000/account/info/'
         headers : {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         }
       });
+      dispatch(getUserInfo(response.data));
       await AsyncStorage.setItem('email', response.data.email);
       await AsyncStorage.setItem('type', response.data.type);
       await AsyncStorage.setItem('name', response.data.name);
@@ -45,7 +47,7 @@ const Splash = () => {
     });
     
     try {
-      const response = await axios.post(BACKEND+`:8000/account/token/refresh/`, //BACKEND+':8000/account/token/refresh/' BACKEND+`:8000/account/token/refresh/`
+      const response = await axios.post(BACKEND+':8000/account/token/refresh/', //BACKEND+':8000/account/token/refresh/' BACKEND+`:8000/account/token/refresh/`
         { refresh : refreshtoken },
         {
           headers: {
@@ -55,6 +57,7 @@ const Splash = () => {
         
       );
       console.log(response.status);
+      dispatch(getUserToken(response.data));
       await AsyncStorage.setItem('access', response.data.access);
       getData(); // 사용자 정보 가져오기
       await AsyncStorage.getItem('type', (err, result) => {
@@ -65,7 +68,7 @@ const Splash = () => {
         navigation.navigate("Home", { screen: 'Home' });
       }
       else if (type === "counselee") {
-        navigation.navigate("Signup", { screen: 'Signup' });
+        navigation.navigate("Home", { screen: 'Home' });
       }
     }
     catch (error) {
@@ -78,7 +81,7 @@ const Splash = () => {
   async function fetchCounseleesFromBackend() {
     try {
         access = await AsyncStorage.getItem("access");
-        const response = await axios.get(BACKEND+`:8000/counselee/`/*BACKEND+':8000/counselee/' BACKEND+`:8000/counselee/`*/,
+        const response = await axios.get(BACKEND+':8000/counselee/'/*BACKEND+':8000/counselee/' BACKEND+`:8000/counselee/`*/,
         {
             headers: {
                 "Content-Type": "application/json",

@@ -4,6 +4,7 @@ import counselorReducer from './reducers/counselors/counselorReducer';
 import reservationReducer from './reducers/reservations/reservationReducer';
 import counseleeReducer from './reducers/counselees/counseleeReducer';
 import resultReducer from './reducers/results/resultReducer';
+import userReducer from './reducers/user/userReducer';
 import { addCounselor } from './actions/counselors/counselorAction';
 import { configureStore, createSlice } from '@reduxjs/toolkit'
 import { BACKEND } from '@env';
@@ -23,6 +24,7 @@ import { BACKEND } from '@env';
 //     counselorReducer
 // );
 const rootReducer = combineReducers({
+    userReducer,
     counseleeReducer,
     counselorReducer,
     resultReducer,

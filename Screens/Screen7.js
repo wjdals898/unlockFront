@@ -17,23 +17,6 @@ const ClientDiaryList = ({ route, navigation }) => {
     const resultList = useSelector(state => state.resultReducer.resultList);
     //const prevCurrentItems = usePrevious(currentItems); // 이전 currentItems 저장
 
-    // usePrevious 함수 정의
-    // function usePrevious(value) {
-    //     const ref = useRef();
-    //     useEffect(() => {
-    //     ref.current = value;
-    //     });
-    //     return ref.current;
-    // }
-
-    // // const navigation = useNavigation();
-
-    // useEffect(() => {
-    //     // currentItems가 변경되었을 때만 실행
-    //     if (prevCurrentItems !== currentItems) {
-    //         console.log('currentItems updated:', currentItems);
-    //     }
-    // }, [currentItems, prevCurrentItems]);
     useEffect(() => {
         // 화면이 마운트되었을 때, 백엔드에서 회원 리스트를 가져와서 상태에 저장
         fetchResultsFromBackend()
@@ -58,12 +41,16 @@ const ClientDiaryList = ({ route, navigation }) => {
         console.log("결과 리스트 업데이트");
     }, [currentItems]);
 
+    useEffect(() => {
+        console.log('resultLis Update');
+    }, [resultList]);
+
     async function fetchResultsFromBackend() {
         console.log("counselee_id : ", personId);
         try {
             const access = await AsyncStorage.getItem("access");
             console.log("결과 가져오기", access);
-            const response = await axios.get(BACKEND+`:8000/result/`/*BACKEND+':8000/result/' BACKEND+`:8000/result/`*/,
+            const response = await axios.get(BACKEND+':8000/result/'/*BACKEND+':8000/result/' BACKEND+`:8000/result/`*/,
             {
                 params: {id: personId},
                 headers: {

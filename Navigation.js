@@ -3,7 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer, useRoute, useFocusEffect } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image, BackHandler } from 'react-native';
-
+import { useSelector } from 'react-redux';
 //import Axios from 'axios';
 
 import Splash from './Screens/splash';
@@ -66,7 +66,8 @@ function SettingScreen() {
   );
 }
 
-function Camera() {
+function CounselorCamera() {
+
   return (
     <Stack.Navigator initialRouteName="Screen8">
       <Stack.Screen
@@ -84,7 +85,20 @@ function Camera() {
   );
 }
 
-function ResultScreen() {
+function CounseleeCamera() {
+
+  return (
+    <Stack.Navigator initialRouteName="CameraStack">
+      <Stack.Screen
+        name="CameraStack"
+        component={CameraStack}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function CounselorResultScreen() {
   return (
     <Stack.Navigator
       initialRouteName="Screen2"
@@ -99,13 +113,29 @@ function ResultScreen() {
   )
 }
 
+function CounseleeResultScreen() {
+  return (
+    <Stack.Navigator
+      initialRouteName="result"
+    >
+      <Stack.Screen name="result" component={result} options={{headerShown: false}} />
+      <Stack.Screen name="result2" component={result2} options={{headerShown: false}} />
+      <Stack.Screen name="actresult" component={actresult} options={{headerShown: true}} />
+      <Stack.Screen name="NewScreen" component={NewScreen} options={{headerShown: true}} />
+      <Stack.Screen name="ImageScreen" component={ImageScreen} options={{headerShown: true, headerTitle: ""}} />
+    </Stack.Navigator>
+  )
+}
+
 function HomeScreen() {
+  const userInfo = useSelector(state => state.userReducer.userInfo);
+
   return (
     <Stack.Navigator
       initialRouteName="Screen1"
     >
       <Stack.Screen name="Screen1" component={Screen1} options={{headerShown: false}} />
-      <Stack.Screen name="Screen2" component={ResultScreen} options={{headerShown: false}} />
+      <Stack.Screen name="Screen2" component={userInfo.type === 'counselor' ? CounselorResultScreen : CounseleeResultScreen} options={{headerShown: false}} />
       <Stack.Screen name="Calendar" component={Calendar} options={{headerShown: false}} />
       <Stack.Screen name="Screen7" component={Screen7} options={{headerShown: false}} />
       <Stack.Screen name="Screen4" component={SettingScreen} options={{headerShown: false}} />
@@ -153,17 +183,19 @@ const deleteTodo = (id: number) => {
 const BottomTab = createBottomTabNavigator();
 
 function BottomStack() {
+  const userInfo = useSelector(state => state.userReducer.userInfo);
+
   return (
     <BottomTab.Navigator
       screenOptions={{
         headerShown : false,
         tabBarLabelStyle: { display: 'none' }, // 이름 숨기기
-        tabBarStyle: { backgroundColor : '#A9C3D0', height : 70 }
+        tabBarStyle: { backgroundColor : 'white', height : 70 }
       }}
     >
       <BottomTab.Screen
         name="Video"
-        component={Camera}
+        component={userInfo.type === 'counselor' ? CounselorCamera : CounseleeCamera}
         options={{
           headerShown: false,
           tabBarIcon: () => (
@@ -176,7 +208,7 @@ function BottomStack() {
       />
       <BottomTab.Screen
         name="List"
-        component={ResultScreen}
+        component={userInfo.type === 'counselor' ? CounselorResultScreen : CounseleeResultScreen}
         options={{
           headerShown: false,
           tabBarIcon: () => (

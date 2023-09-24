@@ -136,7 +136,7 @@ const PersonList = ({ navigation }) => {
     console.log("person : ", item);
     console.log("id : ", item.id);
     // PersonList에서 선택된 아이템 정보를 넘겨줍니다.
-    navigation.navigate("CameraStack", {personId: item.id, personName: item.userkey.name});
+    navigation.navigate("CameraStack", {personId: item.id, personName: item.name});
   };
 
   const renderPersonItem = ({ item, index }) => {
@@ -162,10 +162,10 @@ const PersonList = ({ navigation }) => {
         <TouchableOpacity onPress={() => showPersonDetails(item)}>
           <View style={styles.personItem}>
             {/* 리스트 아이템 내용 */}
-            <Text>Name: {item.userkey.name}</Text>
+            <Text>Name: {item.name}</Text>
             {/* <Text>Age: {item.age}</Text> */}
-            <Text>Gender: {item.userkey.gender}</Text>
-            <Text>Birth: {item.userkey.birth}</Text>
+            <Text>Gender: {item.gender}</Text>
+            <Text>Birth: {item.birth}</Text>
           </View>
         </TouchableOpacity>
       </Swipeable>

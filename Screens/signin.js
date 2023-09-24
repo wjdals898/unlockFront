@@ -4,6 +4,10 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from 'axios';
 import {BACKEND} from '@env';
+import { useDispatch } from "react-redux";
+import userReducer from "../store/reducers/user/userReducer";
+import { getUserInfo, getUserToken } from "../store/actions/user/userAction";
+import { fetchCounselees } from "../store/actions/counselees/counseleeAction";
 
 const Signin = () => {
   const [id, setId] = useState(""); // State로 ID 상태 관리
@@ -11,19 +15,21 @@ const Signin = () => {
 
   const navigation = useNavigation();
 
+  const dispatch = useDispatch();
+
   const handleLogin = async () => {
     console.log("로그인 버튼 클릭");
     if (!id) alert('아이디를 입력하세요.');
     else if (!password) alert('비밀번호를 입력하세요.');
     else {
       try {
-        const login = await axios.post(BACKEND+':8000/account/kakao/callback/', { //`${BACKEND}:8000/account/kakao/callback/`
+        const login = await axios.post(BACKEND+':8000/account/kakao/callback/', { //BACKEND+':8000/account/kakao/callback/' `${BACKEND}:8000/account/kakao/callback/`
           data: {
             email: id,
             password: password
           }
         });
-        const user_info = await axios.get(BACKEND+':8000/account/info/', { /* BACKEND+`:8000/account/info/` */
+        const user_info = await axios.get(BACKEND+':8000/account/info/', { /*BACKEND+':8000/account/info/' BACKEND+`:8000/account/info/` */
           headers : {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${login.data.access}`
@@ -31,6 +37,8 @@ const Signin = () => {
         });
         console.log(login.data);
         console.log(user_info.data.type);
+        dispatch(getUserToken(login.data));
+        dispatch(getUserInfo(user_info.data));
         await AsyncStorage.setItem('access', login.data.access);
         await AsyncStorage.setItem('refresh', login.data.refresh);
         const type = await AsyncStorage.setItem('type', user_info.data.type);
@@ -42,7 +50,7 @@ const Signin = () => {
           navigation.navigate("Home", { screen: 'Home' });
         }
         else if (type === "counselee") {
-          navigation.navigate("Signup", { screen: 'Signup' });
+          navigation.navigate("Home", { screen: 'Home' });
         }
         else {
           navigation.navigate("Signup");
@@ -55,6 +63,7 @@ const Signin = () => {
       }
     }
   };
+
 
   return (
     <View style={Styles.container}>      
