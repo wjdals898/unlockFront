@@ -4,6 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import { Calendar } from 'react-native-calendars';
 import { Swipeable } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/AntDesign';
 import { useSelector, useDispatch } from 'react-redux';
 import { format } from "date-fns";
 import axios from 'axios';
@@ -246,7 +247,7 @@ const CalendarScreen = ({route, navigation}) => {
       try {
         console.log("백엔드에 예약 정보 보내기 전");
 
-        const response = await axios.post(BACKEND+':8000/reservation/', { //BACKEND+`:8000/reservation/`
+        const response = await axios.post(BACKEND+':8000/reservation/', { //BACKEND+':8000/reservation/' BACKEND+`:8000/reservation/` `${BACKEND}:8000/reservation/`
           data: {
             type: topicId,
             counselor_id: counselorId,
@@ -370,7 +371,7 @@ const CalendarScreen = ({route, navigation}) => {
         )}
       </View>
       <TouchableOpacity style={styles.addButton} onPress={selectedDate? handleAddEvent : alertSelect}>
-        <FontAwesome name="plus" size={24} color="white" />
+        <Icon name="plus" size={24} color="white" />
       </TouchableOpacity>
 
       {/* Add Event Modal */}

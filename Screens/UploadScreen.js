@@ -7,14 +7,18 @@ import { launchImageLibrary } from "react-native-image-picker";
 import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BACKEND } from "@env";
+import { useDispatch, useSelector } from "react-redux";
+import { addResult } from "../store/actions/results/resultAction";
 
 const UploadScreen = ({route, navigation}) => {
   const { personId } = route.params;
   const { listItems } = route.params;
+  const access = useSelector(state => state.userReducer.access);
   const [currentItems, setCurrentItems] = useState(listItems || []);
   const [video, setVideo] = useState(null);
   const [response, setResponse] = useState("");
   const [imageFile, setImageFile] = useState("");
+  const dispatch = useDispatch();
   //const navigation = useNavigation();
 
   const pickVideo = async () => {
@@ -25,7 +29,6 @@ const UploadScreen = ({route, navigation}) => {
   
       // result.uri에 선택한 동영상 파일의 경로가 포함됩니다.
       console.log('result: ', result[0].uri);
-      console.log('Video URI:', result.uri);
       setVideo(result[0]);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
@@ -60,15 +63,15 @@ const UploadScreen = ({route, navigation}) => {
     formData.append('counselee_id', personId);
     console.log(video.uri);
     console.log("formData",formData);
-    await AsyncStorage.getItem('access', (err, result) => {
-      token = result;
-    });
-    console.log("acceess 토큰 : ", token);
+    // await AsyncStorage.getItem('access', (err, result) => {
+    //   token = result;
+    // });
+    console.log("acceess 토큰 : ", access);
     try {
-      const response = await axios.post(BACKEND+`:8000/result/`/*BACKEND+':8000/result/' BACKEND+`:8000/result/`*/, formData, {
+      const response = await axios.post(BACKEND+':8000/result/'/*BACKEND+':8000/result/' BACKEND+`:8000/result/`*/, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${access}`,
         },
         transformRequest: (data, headers) => {
           return data;
@@ -85,6 +88,7 @@ const UploadScreen = ({route, navigation}) => {
       
       setCurrentItems((prevList) => [...prevList, item]);
       console.log("UploadScreen currentItems : ", [...currentItems, item]);
+      dispatch(addResult(item));
       navigation.navigate("Screen7", {personId: personId, listItems: [...currentItems, item]});
     } catch (error) {
       console.error('Error uploading video:', error);

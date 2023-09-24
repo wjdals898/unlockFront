@@ -24,7 +24,7 @@ const Infoscreen = () => {
       refresh_token = result;
     });
     try {
-      const response = await axios.post(BACKEND+':8000/account/logout/', { //BACKEND+`:8000/account/logout/`
+      const response = await axios.post(BACKEND+':8000/account/logout/', { //BACKEND+`:8000/account/logout/` `${BACKEND}:8000/account/logout/`
         refresh: refresh_token
       });
       await AsyncStorage.removeItem('refresh');

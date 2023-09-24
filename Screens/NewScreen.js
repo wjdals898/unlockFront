@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { LineChart } from 'react-native-chart-kit'; // 예시를 위한 차트 라이브러리
-import { Svg, Circle } from 'react-native-svg';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, processColor  } from 'react-native';
+import { LineChart, Bu } from 'react-native-chart-kit'; // 예시를 위한 차트 라이브러리
+import { BubbleChart } from 'react-native-charts-wrapper';
+import Plotly from 'react-native-plotly';
+import { VictoryChart, VictoryLabel, VictoryScatter, VictoryTheme, VictoryArea, VictoryZoomContainer } from 'victory-native';
 
-
-
-function NewScreen({csvData, header}) {
+const NewScreen = ({mindData, mindHeader, moveData}) => {
   const [activeComponent, setActiveComponent] = useState('first');
-  console.log('csvData : ', csvData);
 
   return (
     <View style={styles.container}>
@@ -19,74 +18,109 @@ function NewScreen({csvData, header}) {
           <Text style={styles.tabComponent}>행동</Text>
         </TouchableOpacity>
       </View>
-      {activeComponent === 'first' ? <MindComponent header={header} csvData={csvData}/> : <MovementComponent header={header} csvData={csvData}/>}
+      {activeComponent === 'first' ? <MindComponent header={mindHeader} csvData={mindData}/> : <MovementComponent csvData={moveData}/>}
     </View>
   );
 }
 
-function MovementComponent({header, csvData}) {
-  const data = {
-    labels: header.slice(3),
-    datasets: [
-      {
-        data: Object.values(csvData),
-      },
-    ],
-  };
+function MovementComponent({csvData}) {
+  if (csvData.length === 0) {
+    return null; // 빈 배열이면 아무것도 렌더링하지 않음
+  }
+  const data = csvData.map(item => (
+    {
+      x: item.time,
+      y: item.mag_mean,
+    }
+  ));
+  console.log('movedata : ', data);
 
   return (
-    <View>
-      {csvData ?
-      <LineChart
-        data={data}
-        width={350}
-        height={300}
-        yAxisSuffix="%"
-        yAxisInterval={1}
-        chartConfig={{
-          backgroundColor: '#F4BAB2',
-          backgroundGradientFrom: '#fb8c00',
-          backgroundGradientTo: '#ffa726',
-          decimalPlaces: 2,
-          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        }}
-        bezier
-        style={{ marginVertical: 8, borderRadius: 16 }}
-      /> : null }
+    <View style={styles.container}>
+      <VictoryChart
+        minDomain={{y:0}}
+        theme={VictoryTheme.material}
+        animate={{duration: 1000, easing: "sinInOut"}}
+        containerComponent={
+          <VictoryZoomContainer responsive={false}
+            zoomDimension="x"/>
+        }
+      >
+        <VictoryArea
+          style={{data: {fill: '#e26a00'}}}
+          interpolation="natural"
+          data={data}
+        />
+      </VictoryChart>
     </View>
   );
 }
 
-function MindComponent({header, csvData}) {
-  console.log(csvData);
-  const data = {
-    labels: header.slice(3),
-    datasets: [
-      {
-        data: Object.values(csvData),
-      },
-    ],
-  };
+const MindComponent = ({header, csvData}) => {
+  console.log('mind화면 : ', csvData);
+
+  // useEffect(() => {
+  //   console.log('csvData 업데이트 그래프 컴포넌트');
+  // }, [data]);
+
+  if (csvData.length === 0) {
+    return null; // 빈 배열이면 아무것도 렌더링하지 않음
+  }
+  const data1 = csvData.map(item => (
+    {
+      x: item.x*100,
+      y: item.y*100,
+      amount: Math.random() * 10+5,
+    }
+  ));
+  console.log('data1 : ', data1);
+
+  const label = csvData.map(item => (
+    item[""]
+  ));
+  console.log('label : ', label);
+
+  // const x_data = csvData.map(item => (
+  //   item.x
+  // ));
+  // console.log('x : ', x_data);
+  // const y_data = csvData.map(item => (
+  //   item.y
+  // ));
+  // console.log('y : ', y_data);
+  const data = [
+    {
+      x:[39, 28, 8, 7, 28, 39],
+      y: [39, 28, 8, 7, 28, 39],
+      type: 'scatter',
+      mode: 'lines+markers',
+      marker: {color: 'red'},
+    }
+  ];
 
   return (
-    <View>
+    <View style={styles.container}>
       {csvData ?
-      <LineChart
-        data={data}
-        width={350}
-        height={300}
-        yAxisSuffix="%"
-        yAxisInterval={1}
-        chartConfig={{
-          backgroundColor: '#e26a00',
-          backgroundGradientFrom: '#fb8c00',
-          backgroundGradientTo: '#ffa726',
-          decimalPlaces: 2,
-          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        }}
-        bezier
-        style={{ marginVertical: 8, borderRadius: 16 }}
-      /> : null }
+        <VictoryChart
+          theme={VictoryTheme.material}
+          domain={{x:[-200,200], y:[-100,100]}}
+          animate={{duration: 2000, easing: "circleIn"}}
+        >
+          <VictoryScatter
+            style={{
+              parent: {border: "1px solid #ccc"},
+              data: {fill: "#c43a31", fillOpacity: 0.6, stroke: '#c43a31', strokeWidth: 3}, 
+              labels: {fill: 'white', fontSize: 14}}}
+            bubbleProperty="amount"
+            maxBubbleSize={40}
+            minBubbleSize={10}
+            data={data1}
+            labels={label}
+            labelComponent={<VictoryLabel dy={3}/>}
+          />
+        </VictoryChart>
+        : <Text>차트가 없습니다.</Text>
+      }
     </View>
   );
 }
@@ -151,15 +185,14 @@ const ChartScreen = () => {
 const styles = StyleSheet.create({
   ChartComponent: {
     flexDirection: 'row',
-    
     width:"100%",
-    
+    marginBottom: 0,
   },
   container: {
     flex: 1,
     alignItems: 'center',
     backgroundColor: '#f5fcff',
-    width: 370,
+    width: '100%',
     marginBottom: 20,
     borderRadius: 10,
   },
@@ -215,6 +248,17 @@ const styles = StyleSheet.create({
     padding: 10,
     width: '80%',
   },
+  Container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  chart: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
 });
+
 
 export default NewScreen;

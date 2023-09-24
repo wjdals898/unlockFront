@@ -53,7 +53,7 @@ const BookingListScreen = ({ route, navigation }) => {
 
     const fetchDataFromBackend = async () => {
         try {
-            const response = await axios.get(BACKEND+':8000/reservation/counselorlist/'); // BACKEND+`:8000/reservation/counselorlist/`
+            const response = await axios.get(BACKEND+':8000/reservation/counselorlist/'); // `${BACKEND}:8000/reservation/counselorlist/` BACKEND+':8000/reservation/counselorlist/' BACKEND+`:8000/reservation/counselorlist/`
             console.log(response.data);
             return response.data;
         }
@@ -68,7 +68,7 @@ const BookingListScreen = ({ route, navigation }) => {
           token = result;
         });
         console.log(token);
-        const response = await axios.get(BACKEND+':8000/reservation/all/', { //BACKEND+`:8000/reservation/all/`
+        const response = await axios.get(BACKEND+':8000/reservation/all/', { //`${BACKEND}:8000/reservation/all/` BACKEND+':8000/reservation/all/' BACKEND+`:8000/reservation/all/`
           params: {
             topic: selectedId
           },

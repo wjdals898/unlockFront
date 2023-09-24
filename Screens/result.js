@@ -11,7 +11,9 @@ import Papa from 'papaparse';
 
 
 const Result = ({ route, navigation }) => {
-  const { person } = route.params; // route.params에서 person 객체 가져오기
+  const userInfo = useSelector(state => state.userReducer.userInfo);
+  console.log('result 페이지 userInfo : ', userInfo);
+  const person  = route.params.person || userInfo; // route.params에서 person 객체 가져오기
   console.log('person',person);
   const listItems = useSelector(state => state.resultReducer.resultList);
   console.log('listItems: ', listItems);
@@ -23,9 +25,15 @@ const Result = ({ route, navigation }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   //const [emotionResult, setEmotionResult] = useState([]);
   //const emotions = useSelector(state => state.resultReducer.emotion);
-  const [csvData, setCsvData] = useState([]);
-  const [csvHeaders, setCsvHeaders] = useState([]);
-  const [downloaded, setDownloaded] = useState(false);
+  const [csvData1, setCsvData1] = useState([]);
+  const [csvHeaders1, setCsvHeaders1] = useState([]);
+  const [downloaded1, setDownloaded1] = useState(false);
+  const [csvData2, setCsvData2] = useState([]);
+  const [csvHeaders2, setCsvHeaders2] = useState([]);
+  const [downloaded2, setDownloaded2] = useState(false);
+  const [csvData3, setCsvData3] = useState([]);
+  const [csvHeaders3, setCsvHeaders3] = useState([]);
+  const [downloaded3, setDownloaded3] = useState(false);
   const [emotions, setEmotions] = useState([]);
 
   //console.log('emotions : ', emotions);
@@ -53,12 +61,13 @@ const Result = ({ route, navigation }) => {
     "Sadmean": '슬픔',
   };
 
-  const downloadCsv = async () => {
+  const downloadCsv1 = async () => {
     try {
-      console.log('csv 다운로드 함수 호출');
+      console.log('csv1 다운로드 함수 호출');
       console.log('currentResult : ', currentResult);
-      const response = await axios.post(BACKEND+`:8000/result_file_download/`, { // BACKEND+':8000/result_file_download/'
+      const response = await axios.post(BACKEND+':8000/result_file_download/', { // BACKEND+':8000/result_file_download/' `${BACKEND}:8000/result_file_download/`
         //responseType: 'blob',
+          type: 1,
           c_id: currentResult.counselee,
           r_id: currentResult.id,
       });
@@ -78,11 +87,95 @@ const Result = ({ route, navigation }) => {
           skipEmptyLines: true, // 빈 줄 스킵
           complete: (result) => {
             // 파싱된 데이터 저장
-            setCsvHeaders(result.meta.fields);
+            setCsvHeaders1(result.meta.fields);
             console.log('Header : ', result.meta.fields);
-            setCsvData(result.data);
+            setCsvData1(result.data);
             console.log('field data : ', result.data);
-            setDownloaded(true);
+            setDownloaded1(true);
+            console.log('resultData : ', result.data);
+          },
+        });
+      };
+      reader.readAsText(blob);
+
+    } catch (error) {
+      console.error('Failed to download CSV:', error);
+    }
+  };
+
+  const downloadCsv2 = async () => {
+    try {
+      console.log('csv2 다운로드 함수 호출');
+      console.log('currentResult : ', currentResult);
+      const response = await axios.post(BACKEND+':8000/result_file_download/', { // BACKEND+':8000/result_file_download/' `${BACKEND}:8000/result_file_download/`
+        //responseType: 'blob',
+          type: 2,
+          c_id: currentResult.counselee,
+          r_id: currentResult.id,
+      });
+
+      console.log('데이터 확인!!', response.data);
+
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      console.log('blob', blob);
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const text = reader.result;
+        console.log('text', text);
+        // CSV 파싱
+        Papa.parse(text, {
+          header: true, // 첫 번째 줄을 헤더로 사용
+          dynamicTyping: true, // 자동 형변환
+          skipEmptyLines: true, // 빈 줄 스킵
+          complete: (result) => {
+            // 파싱된 데이터 저장
+            setCsvHeaders2(result.meta.fields);
+            console.log('Header : ', result.meta.fields);
+            setCsvData2(result.data);
+            console.log('field data : ', result.data);
+            setDownloaded2(true);
+            console.log('resultData : ', result.data);
+          },
+        });
+      };
+      reader.readAsText(blob);
+
+    } catch (error) {
+      console.error('Failed to download CSV:', error);
+    }
+  };
+
+  const downloadCsv3 = async () => {
+    try {
+      console.log('csv3 다운로드 함수 호출');
+      console.log('currentResult : ', currentResult);
+      const response = await axios.post(BACKEND+':8000/result_file_download/', { // BACKEND+':8000/result_file_download/' `${BACKEND}:8000/result_file_download/`
+        //responseType: 'blob',
+          type: 3,
+          c_id: currentResult.counselee, //currentResult.counselee
+          r_id: currentResult.id,//currentResult.id
+      });
+
+      console.log('데이터 확인!!', response.data);
+
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      console.log('blob', blob);
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const text = reader.result;
+        console.log('text', text);
+        // CSV 파싱
+        Papa.parse(text, {
+          header: true, // 첫 번째 줄을 헤더로 사용
+          dynamicTyping: true, // 자동 형변환
+          skipEmptyLines: true, // 빈 줄 스킵
+          complete: (result) => {
+            // 파싱된 데이터 저장
+            setCsvHeaders3(result.meta.fields);
+            console.log('Header : ', result.meta.fields);
+            setCsvData3(result.data);
+            console.log('field data : ', result.data);
+            setDownloaded3(true);
             console.log('resultData : ', result.data);
           },
         });
@@ -96,73 +189,38 @@ const Result = ({ route, navigation }) => {
 
   useEffect(() => {
     console.log('result 화면 렌더');
-    downloadCsv();
+    downloadCsv1();
+    downloadCsv2();
+    downloadCsv3();
   }, []);
 
+
   useEffect(() => {
-    if (downloaded) {
+    if (downloaded1) {
       // csvData가 변경되면 화면을 다시 렌더
-      console.log('CSV Data:', csvData);
-      const emotion = csvData.map(item => {
+      console.log('CSV Data11:', csvData1);
+      const emotion = csvData1.map(item => {
         const { end, start, text, ...rest } = item;
         return rest;
       });
       console.log('emoton = ', emotion);
       setEmotions(emotion);
-      
     }
-  }, [csvData, downloaded, currentResult]); //csvData, downloaded
+  }, [csvData1, downloaded1, currentResult]); //csvData, downloaded
 
-  // useEffect(() => {
-  //   console.log('emotion 업데이트', emotions);
-  // }, [emotions]);
+  useEffect(() => {
+    if (downloaded2) {
+      // csvData가 변경되면 화면을 다시 렌더
+      console.log('CSV Data22:', csvData2);
+    }
+  }, [csvData2, downloaded2]); //csvData, downloaded
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     await downloadCsvFile();
-  //   };
-  //   fetchData();
-
-  // }, []);
-
-  // useEffect(() => {
-  //   console.log('circleValues 업데이트');
-  //   console.log(emotionResult);
-  // }, [emotionResult]);
-
-  // useEffect(() => {
-  //   console.log(selectedItem);
-  //   // const filteredList = listItems.reduce((acc, current) => {
-  //   //   const formattedDate = format(new Date(current.date), 'yyyy-MM-dd');
-  //   //   if(current.counselee === person.id) {
-  //   //     console.log("id : ", current.id);
-  //   //     acc.push({
-  //   //       id: current.id,
-  //   //       analysis_url: current.analysis_url,
-  //   //       counselee: current.counselee,
-  //   //       counselor: current.counselor,
-  //   //       date: formattedDate,
-  //   //       video: current.video
-  //   //     });
-  //   //   }
-  //   // },[]);
-  //   const filteredList = listItems.filter(item => item.counselee === person.id);
-  //   console.log("filteredList : ",filteredList);
-  //   setResultItems(filteredList);
-  //   // const fetchData = async () => {
-  //   //   const fetchedResults = await fetchResultsFromBackend();
-  //   //   console.log(fetchedResults);
-  //   //   setResultItems(fetchedResults);
-  //   //   console.log(fetchedResults[fetchedResults.length-1]);
-  //   //   setCurrentResult(fetchedResults[fetchedResults.length-1]);
-  //   // }
-  //   // fetchResultsFromBackend();
-  //   // console.log(fetchedResults);
-  //   // setResultItems(fetchedResults);
-  //   // console.log(fetchedResults[fetchedResults.length-1]);
-  //   // setCurrentResult(fetchedResults[fetchedResults.length-1]);
-  //   //fetchData();
-  // });
+  useEffect(() => {
+    if (downloaded3) {
+      // csvData가 변경되면 화면을 다시 렌더
+      console.log('CSV Data22:', csvData3);
+    }
+  }, [csvData3, downloaded3]); //csvData, downloaded
 
   useEffect(() => {
     resultItems.map((item, index) => {
@@ -173,13 +231,15 @@ const Result = ({ route, navigation }) => {
       }
     });
     console.log('useEffect currentResult ', currentResult);
-    downloadCsv();
+    downloadCsv1();
+    downloadCsv2();
+    downloadCsv3()
   }, [selectedItem]);
 
   const handleCirclePress = (key) => {
     console.log(key, '감정 클릭');
     // 동그라미를 클릭하면 result2 페이지로 이동
-    navigation.navigate('result2', { person: person, key: key });
+    navigation.navigate('result2', { person: person, key: key, mindData: csvData2 });
   };
 
   const screenWidth = Dimensions.get('window').width; // 현재 디바이스의 너비 가져오기
@@ -187,34 +247,32 @@ const Result = ({ route, navigation }) => {
   const handleItemSelected = (itemValue) => {
     console.log('itemValue : ', itemValue);
     setSelectedItem(itemValue);
+    setCurrentResult(itemValue);
   };
 
-  // const circleValues = Object.entries(emotionResult).map(([key, value]) => {
-  //   return { value: `${key}: ${value}`, color: colors[key] };
-  // });
 
   return (
-    <SafeAreaView>
-    <ScrollView contentContainerStyle={styles.container}>
+    <SafeAreaView style={{marginBottom: 10}}>
+    <View style={{alignItems: 'center', }}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>{person.userkey.name ? person.userkey.name : null} 님 상담분석 결과</Text>
+        <Text style={styles.title}>{person.name ? person.name : null} 님 상담분석 결과</Text>
       </View>
-
       <View style={styles.dateContainer}>
         <Picker
-          selectedValue={currentResult}
+          selectedValue={selectedItem}
           onValueChange={handleItemSelected}
           mode="dropdown"
+
         > 
-          <Picker.Item key={-1} label={"날짜를 선택하세요."} value={null} />
+          <Picker.Item key={-1} label={"날짜를 선택하세요."} value={null}/>
           {resultItems && resultItems.map((item, index) => (
             <Picker.Item key={index} label={item.date} value={item} />
           ))}
         </Picker>
         
       </View>
-    
-      
+    </View>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.circleContainer}>
         {emotions.length > 0 ? Object.keys(emotions[0]).map((key, index) => (
           index < 4 ? (
@@ -246,14 +304,12 @@ const Result = ({ route, navigation }) => {
         )) : null}
       </View>
 
-      <View style={{height: '40%'}}>
-        {emotions.length > 0 && csvHeaders.length > 0 ?
-          <NewScreen csvData={emotions[0]} header={csvHeaders}/>
+      <View style={{width: screenWidth - 40, height: '35%'}}>
+        {csvData2.length > 0 && csvHeaders2.length > 0 ?
+          <NewScreen mindData={csvData2} mindHeader={csvHeaders2} moveData={csvData3} />
           : null }
       </View>
-      
-
-      
+        
       <ScrollView style={[styles.navyContainer, { width: screenWidth - 40 }]}>
       <Text>상담 결과</Text>
       </ScrollView>
@@ -266,18 +322,23 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     alignItems: 'center',
+    marginBottom: 10,
   },
   titleContainer: {
+    alignItems: 'center',
     marginTop: 20,
     marginBottom: 20,
+    
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#FFC519',
   },
   dateContainer: {
     borderWidth: 2,
-    borderColor: '#A9C3D0',
+    backgroundColor: 'white',
+    opacity: 0.4,
     borderRadius: 10,
     marginBottom: 20,
     width: '60%',
@@ -295,10 +356,11 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   navyContainer: {
-    height: 200,
+    height: 500,
     backgroundColor: '#A9C3D0',
     borderRadius: 10,
     marginBottom: 20,
+    marginTop: 20,
   },
   circleContainer: {
     flexDirection: 'row',

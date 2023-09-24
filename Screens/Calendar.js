@@ -55,7 +55,7 @@ const BookingScreen = () => {
     
     async function fetchCounselingType() {
         try{
-            const response = await axios.get(BACKEND+':8000/account/type/', //BACKEND+`:8000/account/type/` BACKEND+':8000/account/type/'
+            const response = await axios.get(BACKEND+':8000/account/type/', //BACKEND+`:8000/account/type/` BACKEND+':8000/account/type/' `${BACKEND}:8000/account/type/`
             {
                 headers: {
                     "Content-Type": "application/json",
