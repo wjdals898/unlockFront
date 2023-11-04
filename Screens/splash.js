@@ -72,7 +72,7 @@ const Splash = () => {
       }
     }
     catch (error) {
-      console.log('refresh request failed!', error);
+      
       await AsyncStorage.clear();
       // navigation.navigate("Signin", { screen: 'Signin' });
     }
@@ -92,7 +92,7 @@ const Splash = () => {
         console.log(data);
         return data; // 서버로부터 가져온 회원 리스트 데이터
     } catch (error) {
-        console.error('Error1 fetching members:', error);
+        
         return [];
     }
   };
@@ -137,9 +137,10 @@ const Styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   HomeText: {
-    fontSize: 30,
+    fontSize: 40,
     textAlign: "center",
-    paddingTop: 230
+    paddingTop: 230,
+    fontWeight: '500',
   },
   NextBottom: {
     backgroundColor: "#A9C3D0",
@@ -150,8 +151,9 @@ const Styles = StyleSheet.create({
     borderRadius: 10,
   },
   BottomText: {
-    fontSize: 15,
+    fontSize: 16,
     color: 'white',
     textAlign: "center",
+    fontWeight: 'bold',
   }
 })

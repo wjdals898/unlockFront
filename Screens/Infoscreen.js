@@ -55,6 +55,7 @@ const Infoscreen = () => {
           source={require('../assets/logo.png')}
           style={{ width: 150, height: 150, alignSelf: 'center', borderRadius: 100,
           marginTop : 50}}
+          onError={(error) => console.log('이미지 로드 오류', error)}
         />
       </TouchableOpacity>
             

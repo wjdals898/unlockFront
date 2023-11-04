@@ -3,14 +3,14 @@ import { View } from "react-native";
 
 
 
-const Home = () => {
+const Main = () => {
   return (
     <View>
     </View>
   )
 }
 
-export default Home;
+export default Main;
 
 /*
 import React from "react";

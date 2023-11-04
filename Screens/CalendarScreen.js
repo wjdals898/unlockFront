@@ -27,6 +27,8 @@ const CalendarScreen = ({route, navigation}) => {
   const [markedDates, setMarkedDates] = useState({});
   const [combinedMarkedDates, setCombinedMarkedDates] = useState()
   const dispatch = useDispatch();
+  const today = format(new Date(), 'yyyy-MM-dd');
+  console.log('오늘 날짜 : ', today);
 
   const timeOptions = [
     '09:00',
@@ -119,9 +121,17 @@ const CalendarScreen = ({route, navigation}) => {
       // const selectedEvents = {
       //   [date]: markedDates[date]
       // };
-      Object.keys(markedDates).reduce((acc, key) => {
+      // Object.keys(markedDates).reduce((acc, key) => {
+      //   if (key === date) {
+      //     selectedEvents = markedDates[key];
+      //   }
+      // });
+      Object.keys(markedDates).map((key, index) => {
+        console.log('key = ', key)
+        console.log('date = ', date);
+        console.log('key === date : ', key==date);
         if (key === date) {
-          selectedEvents = markedDates[key];
+            selectedEvents = markedDates[key];
         }
       });
 
@@ -370,9 +380,11 @@ const CalendarScreen = ({route, navigation}) => {
           null // <Text style={styles.noEventsText}>예약이 없습니다.</Text>
         )}
       </View>
-      <TouchableOpacity style={styles.addButton} onPress={selectedDate? handleAddEvent : alertSelect}>
-        <Icon name="plus" size={24} color="white" />
-      </TouchableOpacity>
+      {selectedDate >= today ?
+        <TouchableOpacity style={styles.addButton} onPress={selectedDate? handleAddEvent : alertSelect}>
+          <Icon name="plus" size={24} color="white" />
+        </TouchableOpacity>
+      : <></>}
 
       {/* Add Event Modal */}
       <Modal visible={modalVisible} transparent={true} onRequestClose={handleModalClose}>

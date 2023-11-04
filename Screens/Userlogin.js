@@ -163,7 +163,8 @@ export default Userlogin ;
 
 const Styles = StyleSheet.create({
   container: {
-    padding: 20,
+    paddingLeft: 20,
+    paddingRight: 20,
     flexGrow: 1,
     justifyContent: 'center',
     backgroundColor: '#fff',
@@ -176,22 +177,24 @@ const Styles = StyleSheet.create({
     borderRadius: 5,
   },
   HomeText: {
-    fontSize: 30,
+    fontSize: 35,
     textAlign: "center",
-    
+    fontWeight: 'bold',
+    marginBottom: 30,
   },
   NextBottom: {
     backgroundColor: "#A9C3D0",
     padding: 10,
-    marginTop: "20%",
+    marginTop: "10%",
     width: "50%",
     alignSelf: "center",
     borderRadius: 10,
   },
   BottomText: {
-    fontSize: 15,
+    fontSize: 18,
     color: 'white',
     textAlign: "center",
+    fontWeight: 'bold',
   },
   genderButtonContainer: {
     flexDirection: 'row',

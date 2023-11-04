@@ -11,11 +11,15 @@ const NewScreen = ({mindData, mindHeader, moveData}) => {
   return (
     <View style={styles.container}>
       <View style={styles.ChartComponent}>
-        <TouchableOpacity style={styles.touchButton} onPress={() => setActiveComponent('first')}>
-          <Text style={styles.tabComponent}>마인드맵</Text>
+        <TouchableOpacity 
+          style={[styles.touchButton, activeComponent === 'first' && styles.selectedButton]} 
+          onPress={() => setActiveComponent('first')}>
+            <Text style={styles.tabComponent}>마인드맵</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.touchButton2} onPress={() => setActiveComponent('second')}>
-          <Text style={styles.tabComponent}>행동</Text>
+        <TouchableOpacity 
+          style={[styles.touchButton2, activeComponent === 'second' && styles.selectedButton2]} 
+          onPress={() => setActiveComponent('second')}>
+            <Text style={styles.tabComponent}>행동</Text>
         </TouchableOpacity>
       </View>
       {activeComponent === 'first' ? <MindComponent header={mindHeader} csvData={mindData}/> : <MovementComponent csvData={moveData}/>}
@@ -68,9 +72,9 @@ const MindComponent = ({header, csvData}) => {
   }
   const data1 = csvData.map(item => (
     {
-      x: item.x*100,
-      y: item.y*100,
-      amount: Math.random() * 10+5,
+      x: item.x + item.y*600,
+      y: item.y + item.x*40,
+      amount: Math.abs(item.x-item.y),
     }
   ));
   console.log('data1 : ', data1);
@@ -104,19 +108,20 @@ const MindComponent = ({header, csvData}) => {
         <VictoryChart
           theme={VictoryTheme.material}
           domain={{x:[-200,200], y:[-100,100]}}
-          animate={{duration: 2000, easing: "circleIn"}}
+          
+          //animate={{duration: 2000, easing: "circleIn"}}
         >
           <VictoryScatter
             style={{
               parent: {border: "1px solid #ccc"},
               data: {fill: "#c43a31", fillOpacity: 0.6, stroke: '#c43a31', strokeWidth: 3}, 
-              labels: {fill: 'white', fontSize: 14}}}
+              labels: {fill: 'black', fontSize: 14}}}
             bubbleProperty="amount"
             maxBubbleSize={40}
             minBubbleSize={10}
             data={data1}
             labels={label}
-            labelComponent={<VictoryLabel dy={3}/>}
+            labelComponent={<VictoryLabel dy={1}/>}
           />
         </VictoryChart>
         : <Text>차트가 없습니다.</Text>
@@ -204,9 +209,27 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor:'white',
   },
+  selectedButton: {
+    backgroundColor: '#A9C3D0',
+    padding: 8,
+    borderTopLeftRadius: 10,
+    width:"49.9%",
+    borderWidth: 1,
+    borderColor:'white',
+  },
   touchButton2: {
     display: 'flex',
     backgroundColor: '#E3EEF3',
+    padding: 8,
+    borderTopRightRadius: 10,
+    width:"49.9%",
+    borderWidth: 1,
+    marginLeft: 1,
+    borderColor:'white',
+  },
+  selectedButton2: {
+    display: 'flex',
+    backgroundColor: '#A9C3D0',
     padding: 8,
     borderTopRightRadius: 10,
     width:"49.9%",

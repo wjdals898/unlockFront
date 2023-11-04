@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import userReducer from "../store/reducers/user/userReducer";
 import { getUserInfo, getUserToken } from "../store/actions/user/userAction";
 import { fetchCounselees } from "../store/actions/counselees/counseleeAction";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Signin = () => {
   const [id, setId] = useState(""); // State로 ID 상태 관리
@@ -66,7 +67,7 @@ const Signin = () => {
 
 
   return (
-    <View style={Styles.container}>      
+    <SafeAreaView style={Styles.container}>      
       <Text style={Styles.HomeText}>Log In</Text>
 
       {/* ID 입력 공간 */}
@@ -106,7 +107,7 @@ const Signin = () => {
       >
         <Text style={Styles.BottomText}>KaKaoLogin</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   )
 }
 
@@ -116,11 +117,15 @@ const Styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingLeft: 20,
+    paddingRight: 20,
   },
   HomeText: {
-    fontSize: 30,
+    fontSize: 35,
     textAlign: "center",
-    paddingTop: 230
+    marginTop: '55%',
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
   input: {
     backgroundColor: "#EAF2FF",
@@ -132,7 +137,7 @@ const Styles = StyleSheet.create({
   NextBottom: {
     backgroundColor: "#A9C3D0",
     padding: 10,
-    marginTop: "20%",
+    marginTop: "8%",
     width: "50%",
     alignSelf: "center",
     borderRadius: 10,
