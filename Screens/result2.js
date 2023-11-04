@@ -6,31 +6,46 @@ import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import {Graph} from '../assets/Graph.png';
+import { VictoryChart, VictoryTheme, VictoryArea, VictoryPolarAxis, VictoryGroup, VictoryLine } from 'victory-native';
+import Plotly from 'react-native-plotly';
+import axios from 'axios';
+import Papa from 'papaparse';
+import {BACKEND} from '@env';
+import { DefaultTheme as theme } from '@react-navigation/native';
+import { Color } from '../GlobalStyles';
+import Loading from './loading';
 
 
 const Result2 = ({ route, navigation }) => {
   const [filteredData, setFilteredData] = useState([]);
   const [loaded, setloaded] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState({});
   const userInfo = useSelector(state => state.userReducer.userInfo);
   const {key} = route.params || null;
   console.log('result2 화면');
   console.log('key : ', key.slice(0,-4));
+  const {resultId} = route.params || null;
+  console.log('rId : ', resultId);
   const person = route.params.person || userInfo; // route.params에서 person 객체 가져오기
   console.log('result2 화면 ', person);
   const {mindData} = route.params || null;
   console.log('result2 mindData : ', mindData);
+  const [csvHeader, setCsvHeader] = useState([]);
+  const [csvData, setCsvData] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [downloaded, setDownloaded] = useState(false);
   
 
+  const labels1 = ['행복', '슬픔', '분노', '혐오', '공포', '무감', '놀람'];
   const labels = {
-    'Happymean': '행복',
-    'Surprisemean': '놀람',
-    'Expressionlessmean': '무감',
-    'Fearmean': '공포',
-    'Aversionmean': '혐오',
-    'Angrymean': '분노',
-    'Sadmean': '슬픔',
+    "Happymean": '행복',
+    "Surprisemean": '놀람',
+    "Expressionlessmean": '무감',
+    "Fearmean": '공포',
+    "Aversionmean": '혐오',
+    "Angrymean": '분노',
+    "Sadmean": '슬픔',
   };
 
   console.log('감정 : ', labels[key]);
@@ -51,12 +66,67 @@ const Result2 = ({ route, navigation }) => {
       keyword: data[""],
       sentence: match ? match[1] : null
     };
+    csvData.forEach(item => {
+      if (item.text===result.sentence) {
+          result.data = {
+            Happy: item.Happy,
+            Surprise: item.Surprise,
+            Expressionless: item.Expressionless,
+            Fear: item.Fear,
+            Aversion: item.Aversion,
+            Angry: item.Angry,
+            Sad: item.Sad
+          };
+      }
+    });
+    console.log('result : ', result);
     return result;
+  };
+
+  const fetchEmotionResult = async () => {
+    try {
+      const response = await axios.post(BACKEND+':8000/result_file_download/', {
+        type: 4,
+        c_id: person.id,
+        r_id: resultId,
+      });
+      
+      const blob = new Blob([response.data], { type: 'text/csv' });
+      console.log('blob', blob);
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const text = reader.result;
+        console.log('text', text);
+        // CSV 파싱
+        Papa.parse(text, {
+          header: true, // 첫 번째 줄을 헤더로 사용
+          dynamicTyping: true, // 자동 형변환
+          skipEmptyLines: true, // 빈 줄 스킵
+          complete: (result) => {
+            // 파싱된 데이터 저장
+            setCsvHeader(result.meta.fields);
+            console.log('Header : ', result.meta.fields);
+            setCsvData(result.data);
+            console.log('field data : ', result.data);
+            setDownloaded(true);
+          },
+        });
+      };
+      reader.readAsText(blob);
+    }
+    catch (error) {
+      console.log("ERROR", error);
+    }
   };
 
   useEffect(() => {
     console.log('useEffect : ', filteredData);
   }, [filteredData]);
+
+  useEffect(() => {
+    fetchEmotionResult(); // 전체 감정 분석 결과 가져오기
+    console.log('csvData', csvData);
+  }, []);
 
   useEffect(() => {
     const mfilteredData = mindData.map(data => {
@@ -66,16 +136,24 @@ const Result2 = ({ route, navigation }) => {
     setFilteredData(mfilteredData);
     setloaded(true);
     console.log('filteredMindData : ', mfilteredData);
-  }, []);
+  }, [csvData]);
 
   useEffect(() => {
     console.log('selectedItem : ', selectedItem);
-  }, [selectedItem]);
+    console.log('selectedItem length : ', selectedItem.length);
+    console.log('chartData : ', chartData);
+  }, [selectedItem, chartData]);
 
   const handleItemPress = (index, item) => {
     setSelectedIndex(index); // 터치된 아이템의 인덱스 저장
     console.log('함수 item : ', item);
     setSelectedItem(item);
+    const data = Object.entries(item.data).map(([key, value], i, array) => (
+        [...array],
+        array[i] = {x: labels[key+'mean'], y: value}
+    ));
+    console.log('data : ', data);
+    setChartData(data);
   };
 
   return (
@@ -91,32 +169,50 @@ const Result2 = ({ route, navigation }) => {
           filteredData.map((data, index) => (
             <TouchableOpacity key={index} 
               style={[styles.listItem, selectedIndex === index && styles.selectedItem]}
-              onPress={() => handleItemPress(index, data.sentence)}
+              onPress={() => handleItemPress(index, data)}
             >
               <Text style={{fontSize: 18}}>{index+1}. {data.keyword}</Text>
             </TouchableOpacity>
           )
         )) : <Text style={{textAlign: 'center', fontSize: 20}}>해당 감정의 키워드가 없습니다.</Text>}
       </ScrollView>
-
+      {downloaded ?
       <ScrollView style={styles.actResultContainer}>
         
-        {selectedItem ? (
+        {selectedItem.data ? (
           <View>
-            <Text style={styles.sentenceTitle}>"{<Text style={styles.keyword}>{filteredData[selectedIndex].keyword}</Text>}"(이)가 포함된 문장</Text>
+            <Text style={styles.sentenceTitle}>"{<Text style={styles.keyword}>{selectedItem.keyword}</Text>}"(이)가 포함된 문장</Text>
             <View style={styles.sentenceList}>
-              <Text>{selectedItem}</Text>
+              <Text>{selectedItem.sentence}</Text>
             </View>
             <View style={styles.imageContainer}>
-              <Image 
-                style={styles.image}
-                source={require('../assets/Graph.png')}
-              />
+              <VictoryChart polar
+                  maxDomain={{y:100}}
+                  minDomain={{y:0}}
+                  startAngle={90}
+                  endAngle={450}
+                  theme={VictoryTheme.material}
+                  
+                >
+                  <VictoryPolarAxis
+                    main={[0, 100]}
+                    tickValues={labels1}
+                    labelPlacement="vertical"
+                    style={{tickLabels: {fontSize: 15, padding: 15}}}
+                  />
+                  <VictoryArea
+                    data={chartData} 
+                    style={{ data: { fill: '#67B7DC', fillOpacity: 0.2 } }}
+                  />
+                  
+              </VictoryChart>
+              
             </View>
           </View>
           
         ) : <Text style={{textAlign: 'center', fontSize: 20}}>위에서 키워드를 선택하세요.</Text>}
       </ScrollView>
+      : <Loading/> }
     </ScrollView>
     </SafeAreaView>
   );
@@ -194,6 +290,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     height: '100%',
+    marginTop: 20,
   },
 });
 

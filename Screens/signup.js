@@ -16,7 +16,7 @@ const Signup = () => {
       navigation.navigate("Home", { screen: 'Home' });
     }
     else if (type === "counselee") {
-      navigation.navigate("Signup", { screen: 'Signup' });
+      navigation.navigate("Home", { screen: 'Home' });
     }
   };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions, Linking, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,12 +8,13 @@ import {BACKEND} from '@env';
 import { useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Papa from 'papaparse';
+import Loading from './loading';
 
 
 const Result = ({ route, navigation }) => {
   const userInfo = useSelector(state => state.userReducer.userInfo);
   console.log('result 페이지 userInfo : ', userInfo);
-  const person  = route.params.person || userInfo; // route.params에서 person 객체 가져오기
+  const person = route.params?.person || userInfo; // route.params에서 person 객체 가져오기
   console.log('person',person);
   const listItems = useSelector(state => state.resultReducer.resultList);
   console.log('listItems: ', listItems);
@@ -239,7 +240,8 @@ const Result = ({ route, navigation }) => {
   const handleCirclePress = (key) => {
     console.log(key, '감정 클릭');
     // 동그라미를 클릭하면 result2 페이지로 이동
-    navigation.navigate('result2', { person: person, key: key, mindData: csvData2 });
+    console.log('resultId : ', currentResult.id);
+    navigation.navigate('result2', { resultId: currentResult.id, person: person, key: key, mindData: csvData2 });
   };
 
   const screenWidth = Dimensions.get('window').width; // 현재 디바이스의 너비 가져오기
@@ -252,8 +254,13 @@ const Result = ({ route, navigation }) => {
 
 
   return (
-    <SafeAreaView style={{marginBottom: 10}}>
-    <View style={{alignItems: 'center', }}>
+    
+    
+    <SafeAreaView style={{flex: 1, justifyContent: 'center', marginBottom: 10}}>
+      {downloaded1 && downloaded2 && downloaded3 ?
+
+    <>
+    <View style={{alignItems: 'center'}}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{person.name ? person.name : null} 님 상담분석 결과</Text>
       </View>
@@ -304,7 +311,7 @@ const Result = ({ route, navigation }) => {
         )) : null}
       </View>
 
-      <View style={{width: screenWidth - 40, height: '35%'}}>
+      <View style={{width: screenWidth - 40, height: '34%'}}>
         {csvData2.length > 0 && csvHeaders2.length > 0 ?
           <NewScreen mindData={csvData2} mindHeader={csvHeaders2} moveData={csvData3} />
           : null }
@@ -313,8 +320,10 @@ const Result = ({ route, navigation }) => {
       <ScrollView style={[styles.navyContainer, { width: screenWidth - 40 }]}>
       <Text>상담 결과</Text>
       </ScrollView>
-    </ScrollView>
+    </ScrollView></>
+    : <View><Loading t={1}/></View>}
     </SafeAreaView>
+    
   );
 };
 

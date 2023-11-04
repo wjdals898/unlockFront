@@ -13,12 +13,14 @@ import axios from 'axios';
 import { BACKEND } from '@env';
 import { fetchReservations } from '../store/actions/reservations/reservationAction';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { format } from "date-fns";
 //import BookingScreen from './BookingScreen';
 
 const Stack = createStackNavigator();
 
 const BookingListScreen = ({ route, navigation }) => {
     const counselorList = useSelector(state => state.counselorReducer.counselorList);
+    const access = useSelector(state => state.userReducer.access);
     const dispatch = useDispatch();
 
     const navigation1 = useNavigation();
@@ -64,17 +66,13 @@ const BookingListScreen = ({ route, navigation }) => {
 
     const fetchReservationFromBackend = async () => {
       try {
-        await AsyncStorage.getItem('access', (err, result) => {
-          token = result;
-        });
-        console.log(token);
         const response = await axios.get(BACKEND+':8000/reservation/all/', { //`${BACKEND}:8000/reservation/all/` BACKEND+':8000/reservation/all/' BACKEND+`:8000/reservation/all/`
           params: {
             topic: selectedId
           },
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
+            "Authorization": `Bearer ${access}`,
           }
         });
         console.log(response.data);
@@ -107,6 +105,8 @@ const BookingListScreen = ({ route, navigation }) => {
 };
 
 const HomeListScreen = ({ navigation, buttons }) => {
+  const year = format(new Date(), 'yyyy');
+  console.log('year', year);
 
     const handleButtonPress = (id, name, topicId, topicName) => {
         Alert.alert(

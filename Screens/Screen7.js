@@ -9,29 +9,58 @@ import { useSelector } from 'react-redux';
 //import RNFS from 'react-native-fs';
 
 const ClientDiaryList = ({ route, navigation }) => {
-    const {personId} = route.params;
-    const {personName} = route.params;
-    const {listItems} = route.params;
-    const [currentItems, setCurrentItems] = useState([]);
-    const cameraRef = useRef(null);
     const resultList = useSelector(state => state.resultReducer.resultList);
+    const userInfo = useSelector(state => state.userReducer.userInfo);
+    console.log('userInfo', userInfo);
+    const personId = route.params.personId || userInfo;
+    const personName = route.params.personName || userInfo;
+    const [currentItems, setCurrentItems] = useState([]);
+    const [filteredList, setFilteredList] = useState([]);
+    
     //const prevCurrentItems = usePrevious(currentItems); // 이전 currentItems 저장
 
     useEffect(() => {
         // 화면이 마운트되었을 때, 백엔드에서 회원 리스트를 가져와서 상태에 저장
-        fetchResultsFromBackend()
-            .then((response) => {
-                response.map((data) => {
-                    const item = {
-                        id: data.id,
-                        counselee: data.counselee,
-                        date: data.date,
-                        video: data.video
-                    };
-                    setCurrentItems((prevList) => [...prevList, item]);
-                })
-            })
-            .catch((error) => console.error('Error2 setting results:', error));
+        // if (userInfo.type === 'counselee') { // 내담자 계정일 경우
+        //     fetchResultsFromBackend()
+        //     .then((response) => {
+        //         response.map((data) => {
+        //             const item = {
+        //                 id: data.id,
+        //                 counselee: data.counselee,
+        //                 date: data.date,
+        //                 video: data.video
+        //             };
+        //             setCurrentItems((prevList) => [...prevList, item]);
+        //         })
+        //     })
+        //     .catch((error) => console.error('Error2 setting results:', error));
+        // }
+        if (userInfo.type === 'counselor') {
+            const filterList = resultList.filter((result) => result.counselee === personId);
+            console.log(personName+'결과 리스트 : ', filterList);
+            filterList.map((data) => {
+                            const item = {
+                                id: data.id,
+                                counselee: data.counselee,
+                                date: data.date,
+                                video: data.video
+                            };
+                            setCurrentItems((prevList) => [...prevList, item]);
+                        });
+            //setFilteredList(filteredList);
+        }
+        else {
+            resultList.map((data) => {
+                const item = {
+                    id: data.id,
+                    counselee: data.counselee,
+                    date: data.date,
+                    video: data.video
+                };
+                setCurrentItems((prevList) => [...prevList, item]);
+            });
+        }
     }, []);
 
     useEffect(() => {
@@ -42,7 +71,33 @@ const ClientDiaryList = ({ route, navigation }) => {
     }, [currentItems]);
 
     useEffect(() => {
-        console.log('resultLis Update');
+        console.log('resultList Update');
+
+        if (userInfo.type === 'counselor') {
+            const filterList = resultList.filter((result) => result.counselee === personId);
+            console.log(personName+'결과 리스트 : ', filterList);
+            filterList.map((data) => {
+                const item = {
+                    id: data.id,
+                    counselee: data.counselee,
+                    date: data.date,
+                    video: data.video
+                };
+                setCurrentItems((prevList) => [...prevList, item]);
+            });
+            //setFilteredList(filteredList);
+        }
+        else {
+            resultList.map((data) => {
+                const item = {
+                    id: data.id,
+                    counselee: data.counselee,
+                    date: data.date,
+                    video: data.video
+                };
+                setCurrentItems((prevList) => [...prevList, item]);
+            });
+        }
     }, [resultList]);
 
     async function fetchResultsFromBackend() {
@@ -69,15 +124,15 @@ const ClientDiaryList = ({ route, navigation }) => {
 
     const addDiary = () => {
         Alert.alert(
-        '다이어리 작성',
-        '다이어리 작성을 시작하시겠습니까?',
+        userInfo.type === 'counselor' ? '상담영상 추가' : '다이어리 작성',
+        userInfo.type === 'counselor' ? '상담영상을 추가하시겠습니까?' : '다이어리 작성을 시작하시겠습니까?',
         [
             {
-            text: '시작',
-            onPress: () => navigation.navigate("MainScreen", {personId: personId, listItems: currentItems}),
+            text: '네',
+            onPress: () => navigation.navigate("UploadScreen", {personId: personId, listItems: currentItems}),
             },
             {
-            text: '취소',
+            text: '아니오',
             style: 'cancel',
             },
         ],
@@ -98,7 +153,7 @@ const ClientDiaryList = ({ route, navigation }) => {
         const formattedDate = date.toISOString().split('T')[0];
         return (
         <View style={styles.personItem}>
-            <Text>[{item.id}] 날짜 : {formattedDate}</Text>
+            <Text>[{index+1}] 날짜 : {formattedDate}</Text>
             <TouchableOpacity style={styles.deleteButton} onPress={() => deleteDiary(index)}>
             <Text style={styles.deleteButtonText}>삭제</Text>
             </TouchableOpacity>
@@ -110,7 +165,7 @@ const ClientDiaryList = ({ route, navigation }) => {
         
         <View style={styles.container}>
             <View style={styles.item}>
-            <Text style={styles.title}>Video Diary</Text>
+            <Text style={styles.title}>{personName}님의 상담기록</Text>
             </View>
             <FlatList data={currentItems} renderItem={renderDiaryItem} keyExtractor={(item, index) => index.toString()} />
             <TouchableOpacity style={styles.addButton} onPress={addDiary}>

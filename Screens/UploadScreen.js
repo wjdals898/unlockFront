@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Image, Platform, Button } from "react-native";
+import { View, Text, TouchableOpacity, Image, Platform, Button, NativeModules } from "react-native";
 import ImagePicker from 'react-native-image-picker';
 import DocumentPicker from 'react-native-document-picker';
 import { StyleSheet } from "react-native";
@@ -9,6 +9,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BACKEND } from "@env";
 import { useDispatch, useSelector } from "react-redux";
 import { addResult } from "../store/actions/results/resultAction";
+import Video from "react-native-video";
+
 
 const UploadScreen = ({route, navigation}) => {
   const { personId } = route.params;
@@ -16,6 +18,7 @@ const UploadScreen = ({route, navigation}) => {
   const access = useSelector(state => state.userReducer.access);
   const [currentItems, setCurrentItems] = useState(listItems || []);
   const [video, setVideo] = useState(null);
+  const [preVideo, setPreVideo] = useState(null);
   const [response, setResponse] = useState("");
   const [imageFile, setImageFile] = useState("");
   const dispatch = useDispatch();
@@ -26,9 +29,9 @@ const UploadScreen = ({route, navigation}) => {
       const result = await DocumentPicker.pick({
         type: [DocumentPicker.types.video],
       });
-  
+      
       // result.uri에 선택한 동영상 파일의 경로가 포함됩니다.
-      console.log('result: ', result[0].uri);
+      console.log('result: ', result);
       setVideo(result[0]);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
@@ -99,12 +102,18 @@ const UploadScreen = ({route, navigation}) => {
       <View style={styles.container}>
         <Button title="동영상 선택" onPress={pickVideo} style={styles.button}/>
           <View>
-          
-            <Image
-              source={video ? { uri: video.uri } : 0}
-              style={{width:300, height:300, marginTop:20}}
-            />
-
+            {video ?
+          <Video
+            source={video}
+            style={styles.backgroundVideo}
+            paused={false} // 재생/중지 여부
+            resizeMode={"cover"} // 프레임이 비디오 크기와 일치하지 않을 때 비디오 크기를 조정하는 방법을 결정합니다. cover : 비디오의 크기를 유지하면서 최대한 맞게
+            onLoad={e => console.log('Load ', e)} // 미디어가 로드되고 재생할 준비가 되면 호출되는 콜백 함수입니다.
+            repeat={false} // video가 끝나면 다시 재생할 지 여부
+            controls={true}
+          />: <></>}
+            
+            {video ?
             <TouchableOpacity
               style={{
                 backgroundColor: "#4287f5",
@@ -114,7 +123,8 @@ const UploadScreen = ({route, navigation}) => {
                 marginLeft: 60,
                 marginRight: 60,
                 alignItems: "center",
-                justifyContent: "center",
+                //justifyContent: "center",
+                width: 200,
               }}
               onPress={() => onUploadVideo()}
             >
@@ -122,6 +132,7 @@ const UploadScreen = ({route, navigation}) => {
                 동영상 업로드
               </Text>
             </TouchableOpacity>
+            : <></> }
           </View>
       </View>
     );
@@ -145,11 +156,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#4287f5",
     padding: 12,
     borderRadius: 8,
-    marginTop: 20,
+    marginTop: 40,
     marginBottom:20,
     marginLeft: 60,
     marginRight: 60,
-  }
+    
+  },
+  backgroundVideo: {
+    marginTop: 20,
+    marginBottom: 30,
+    height: 300,
+  },
 });
 
 export default UploadScreen;

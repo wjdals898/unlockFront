@@ -33,6 +33,7 @@ import Result from './Screens/result';
 import Findlogin from './Screens/Findlogin';
 
 import CameraStack from "./Screens/CameraStack";
+import CounselorCalendarScreen from './Screens/CounselorCalendar';
 
 const Stack = createStackNavigator();
 
@@ -190,7 +191,7 @@ function BottomStack() {
       screenOptions={{
         headerShown : false,
         tabBarLabelStyle: { display: 'none' }, // 이름 숨기기
-        tabBarStyle: { backgroundColor : 'white', height : 70 }
+        tabBarStyle: { backgroundColor : '#A9C3D0', height : 70 }
       }}
     >
       <BottomTab.Screen
@@ -234,9 +235,11 @@ function BottomStack() {
       />
       <BottomTab.Screen
         name="Calendar"
-        component={Calendar}
+        component={userInfo.type === 'counselor' ? CounselorCalendarScreen : Calendar}
         options={{
-          headerShown: false,
+          headerShown: userInfo.type === 'counselor' ? true : false,
+          headerTitle: '예약',
+          headerTitleAlign: 'center',
           tabBarIcon: () => (
             <Image
               source={require('./assets/2.png')}
